@@ -1,0 +1,11 @@
+{
+    "name": "segment_connect_lambdas",
+    "scripts": {
+        "zip": "zip segment-lambda.zip package.json *.js node_modules",
+        "stage": "aws s3 cp segment-lambda.zip s3://rds-test-igor/segment-connect-lambda/"
+    },
+    "dependencies": {
+        "@segment/analytics-node": "^1.1.0"
+    }
+}
+  

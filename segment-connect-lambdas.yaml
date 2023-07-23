@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Segment - Connect Event Lambda Functions'
+
+Parameters:
+  ResourceBucket:
+    Type: String
+    Description: >
+      S3 bucket name where the Segment - Connect Lambda code will be deployed.
+    Default: 'rds-test-igor'
+
+  ResourceBucketRelativePath:
+    Type: String
+    Description: >
+      Optional path in the Deployment Resources Staging bucket where the deployment resources are stored (e.g. path/path2/).
+      Leave blank if resources are at the root of the Staging Resource Bucket. If specified, MUST end with '/'.
+    Default: 'segment-connect-lambda/'
+
+Resources:
+  SegmentConnectLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Path: /
+  
+  SegmentConnectSendTrackEventFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Sends a track event from a Connect flow to Segment.
+      Handler: segment-lambda.track
+      Runtime: nodejs18.x
+      Role: !GetAtt 'SegmentConnectLambdaExecutionRole.Arn'
+      Timeout: 240
+      Code:
+        S3Bucket: !Ref ResourceBucket
+        S3Key: !Sub '${ResourceBucketRelativePath}segment-lambda.zip'
+          
