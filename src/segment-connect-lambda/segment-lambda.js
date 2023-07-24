@@ -1,7 +1,13 @@
 const { Analytics } = require('@segment/analytics-node');
-
 const analytics = new Analytics({ writeKey: '<YOUR_WRITE_KEY>' });
- 
+const segmentProfileAPIEndpoint = 'https://profiles.segment.com';
+const segmentProfileAPIHeaders = {
+    'Content-Type': 'application/json',
+    Authorization: `Basic ${btoa('<access_token>' + ':')}`,
+  };
+
+// TODO:  Add SSM parameter support for the Segment keys
+
 exports.identify = async function (event, context) {
     // Get your parameters from the Connect invocation
     let phone = event['Details']['ContactData']['CustomerEndpoint']['Address'];
@@ -19,27 +25,31 @@ exports.identify = async function (event, context) {
       });
     
     // Return the merged profile back to Connect flow
-    // result = {
-    //         "AccountId": customerAccountId,
-    //         "Balance": '$%s' % customerBalance
-    //     };
-    // return result;
+    result = {
+              "AccountId": customerAccountId,
+              "Balance": '$%s' % customerBalance
+            };
+    return result;
 };
 
 exports.track = async function (event, context) {
-    console.log(JSON.stringify(event));
+  // Enable this if you need to log the events coming from the Connect Flow.
+  // This will be in the Lambda logs
+  console.log(JSON.stringify(event));
 
-    return {};
-    // Get your parameters from the Connect invocation
-    // let phone = event['Details']['ContactData']['CustomerEndpoint']['Address'];
-    // let eventName = event['Details']['EventName'];
+  // Get your parameters from the Connect invocation
+  // let phone = event['Details']['ContactData']['CustomerEndpoint']['Address'];
 
-    // analytics.track({
-    //     event: eventName,
-    //     userId: '',
-    //     properties: {
-    //       callFlow: 'Michael Bolton',
-    //       email: 'mbolton@example.com'
-    //     }
-    //   });    
+  if( 'EventName' in event['Details']['Parameters'] 
+      && 'FlowName' in event['Details']['Parameters'] ) {
+    let eventName = event['Details']['Parameters']['EventName'];
+    let flowName = event['Details']['Parameters']['FlowName'];
+    analytics.track({
+        event: eventName,
+        properties: {
+          callFlow: flowName,
+        }
+      });
+  }
+  return {};    
 };
