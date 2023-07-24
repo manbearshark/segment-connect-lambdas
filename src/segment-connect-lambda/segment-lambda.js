@@ -1,8 +1,8 @@
 const { Analytics } = require('@segment/analytics-node');
 
+const analytics = new Analytics({ writeKey: '<YOUR_WRITE_KEY>' });
+ 
 exports.identify = async function (event, context) {
-    const analytics = new Analytics({ writeKey: '<YOUR_WRITE_KEY>' });
-
     // Get your parameters from the Connect invocation
     let phone = event['Details']['ContactData']['CustomerEndpoint']['Address'];
 
@@ -27,8 +27,6 @@ exports.identify = async function (event, context) {
 };
 
 exports.track = async function (event, context) {
-    const analytics = new Analytics({ writeKey: '<YOUR_WRITE_KEY>' });
-
     console.log(JSON.stringify(event));
 
     return {};
