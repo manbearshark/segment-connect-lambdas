@@ -1,12 +1,29 @@
 const { Analytics } = require('@segment/analytics-node');
 const analytics = new Analytics({ writeKey: '<YOUR_WRITE_KEY>' });
+const profileAPISpaceID = '<YOUR UNIFTY PROFILES SPACE ID>';
+const profileAPIAccessKey = '<YOUR PROFILE API ACCESS KEY>';
 const segmentProfileAPIEndpoint = 'https://profiles.segment.com';
 const segmentProfileAPIHeaders = {
     'Content-Type': 'application/json',
-    Authorization: `Basic ${btoa('<access_token>' + ':')}`,
+    Authorization: `Basic ${btoa(profileAPIAccessKey + ':')}`,
   };
 
 // TODO:  Add SSM parameter support for the Segment keys
+
+const getUserProfileByPhone = async (phoneNumber) => {
+  const profileQueryURL = `${segmentProfileAPIEndpoint + '/v1/spaces/' + profileAPISpaceID + '/collections/users/profiles/phone_number:' + phoneNumber + '/traits'}`;
+  try {
+    const response = await fetch(profileQueryURL, {
+      method: 'GET',
+      body: myBody, // string or object
+      headers: segmentProfileAPIHeaders 
+    });
+    const responseJSON = await response.json(); //extract JSON from the http response
+    return responseJSON; // do something with myJson
+  } catch (e) {
+    throw e;
+  }
+}
 
 exports.identify = async function (event, context) {
     // Get your parameters from the Connect invocation
